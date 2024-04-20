@@ -1,4 +1,5 @@
 import re
+import sys
 
 
 class Symbol:
@@ -19,6 +20,7 @@ class SymbolTable:
     def __init__(self):
         self.symbols = {}
         self.counter = 1
+        self.error = {}
 
     def add_variable(self, name, obj_address, variable_type, dimension, line_declaration):
         if name not in self.symbols:
@@ -27,7 +29,12 @@ class SymbolTable:
 
     def add_reference(self, name, line_reference):
         if name in self.symbols:
-            self.symbols[name].add_reference(line_reference)
+            if line_reference not in self.symbols[name].line_reference and line_reference != self.symbols[name].line_declaration:
+                self.symbols[name].add_reference(line_reference)
+        else:
+            name = re.sub(r'\b(int|float|char|bool)\b', ' ', name)
+            if not name.isspace():
+                self.error[name] = line_reference
 
     def parse_code(self, code):
         lines = code.split('\n')
@@ -47,7 +54,8 @@ class SymbolTable:
                     dimension = declaration_sent.count('[')
                 self.add_variable(variable_name, obj_address, variable_type, dimension, current_line)
 
-            references = re.findall(r'([a-zA-Z_][a-zA-Z0-9_]*)(?:\s*\[\s*\d+\s*\])*(?:\s*\[\s*\d+\s*\])*\s*=', line)
+            references = re.findall(r'\b([a-zA-Z_][a-zA-Z0-9_]*)\b(?!\s*=\s*;)',
+                                    re.sub(r'\'[^\']*\'|\"[^\"]*\"', '', line))
             for reference in references:
                 self.add_reference(reference.strip(), current_line)
 
@@ -63,3 +71,10 @@ class SymbolTable:
                                                                            symbol.obj_address, symbol.variable_type,
                                                                            symbol.dimension, symbol.line_declaration,
                                                                            ', '.join(map(str, symbol.line_reference))))
+
+        for name, line in self.error.items():
+            print(f'Error: Undeclared variable __{name}__ in line {line}', file=sys.stderr)
+
+        for symbol in self.symbols.values():
+            if len(symbol.line_reference) == 0:
+                print(f'Warning: Unused variable __{symbol.name}__ declared in line {symbol.line_declaration}')
