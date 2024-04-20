@@ -1,12 +1,12 @@
 program -> statement_list
 
-statement_list -> statement | statement statement_list
+statement_list -> statement ';' statement_list | statement ';'
 
-statement -> variable_declaration | assignment_statement | if_statement | while_statement
+statement -> declaration | assignment | if_statement | while_statement
 
-variable_declaration -> type identifier ';' | type assignment_statement
+declaration -> type identifier ';' | type assignment_statement
 
-assignment_statement -> identifier '=' expression ';'
+assignment -> identifier '=' expression
 
 if_statement -> 'if' '(' condition ')' '{' statement_list '}' else_statement
 
@@ -22,8 +22,8 @@ factor -> number | identifier | '(' expression ')'
 
 condition -> expression ('==' | '!=' | '<' | '>' | '<=' | '>=') expression
 
-identifier -> [_a-zA-Z][_a-zA-Z0-9]*
-
 type -> 'int' | 'float' | 'char' | 'bool'
 
-number -> [0-9]+('.'[0-9]+)? | '.'[0-9]+
+identifier -> IDENTIFIER
+
+number -> CONSTANT | STRING

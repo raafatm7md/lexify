@@ -5,6 +5,10 @@ from symbol_table import *
 if __name__ == '__main__':
     source_code = open('code.txt', 'r').read()
     tokens = lexer(source_code)
+
+    parse_tree = parse_program(tokens)
+    print_tree(parse_tree)
+
     symbol_table = SymbolTable()
     symbol_table.parse_code(source_code)
     symbol_table.display_table()

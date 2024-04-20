@@ -42,7 +42,7 @@ class SymbolTable:
 
         for line in lines:
             match = re.match(
-                r'^\s*\b(int|float|char|bool)\b\s+([a-zA-Z_][a-zA-Z0-9_]*)(\s*\[\s*\d+\s*\])*(\s*\[\s*\d+\s*\])*\s*;',
+                r'^\s*\b(int|float|char|bool)\b\s+([a-zA-Z_][a-zA-Z0-9_]*)(\s*\[\s*\d+\s*\])*(\s*\[\s*\d+\s*\])*',
                 line)
             if match:
                 declaration_sent = match.group()
