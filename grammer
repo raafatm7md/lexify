@@ -1,0 +1,29 @@
+program -> statement_list
+
+statement_list -> statement | statement statement_list
+
+statement -> variable_declaration | assignment_statement | if_statement | while_statement
+
+variable_declaration -> type identifier ';' | type assignment_statement
+
+assignment_statement -> identifier '=' expression ';'
+
+if_statement -> 'if' '(' condition ')' '{' statement_list '}' else_statement
+
+else_statement -> 'else' '{' statement_list '}' | ε
+
+while_statement -> 'while' '(' condition ')' '{' statement_list '}'
+
+expression -> term | expression '+' term | expression '-' term
+
+term -> factor | term '*' factor | term '/' factor
+
+factor -> number | identifier | '(' expression ')'
+
+condition -> expression ('==' | '!=' | '<' | '>' | '<=' | '>=') expression
+
+identifier -> [_a-zA-Z][_a-zA-Z0-9]*
+
+type -> 'int' | 'float' | 'char' | 'bool'
+
+number -> [0-9]+('.'[0-9]+)? | '.'[0-9]+

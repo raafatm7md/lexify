@@ -1,0 +1,11 @@
+int i;
+int j[5];
+char c;
+char index[5][6];
+char block[5];
+float f;
+i = 0;
+i = i + k;
+f = f + i;
+c = "x";
+block[4] = c;
