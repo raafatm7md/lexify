@@ -1,29 +1,40 @@
-program -> statement_list
+Program -> StatementList
 
-statement_list -> statement ';' statement_list | statement ';'
+StatementList -> Statement StatementList | ε
 
-statement -> declaration | assignment | if_statement | while_statement
+Statement -> Declaration
+            | Assignment
+            | IfStatement
+            | WhileStatement
+            | PrintStatement
 
-declaration -> type identifier ';' | type assignment_statement
+Declaration -> Type Identifier ; | Type Assignment
 
-assignment -> identifier '=' expression
+Assignment -> Identifier = Expression ;
 
-if_statement -> 'if' '(' condition ')' '{' statement_list '}' else_statement
+IfStatement -> if ( Condition ) { StatementList } ElseStatement
 
-else_statement -> 'else' '{' statement_list '}' | ε
+ElseStatement -> else { StatementList } | ε
 
-while_statement -> 'while' '(' condition ')' '{' statement_list '}'
+WhileStatement -> while ( Condition ) { StatementList }
 
-expression -> term | expression '+' term | expression '-' term
+PrintStatement    -> print ( Expression ) ;
 
-term -> factor | term '*' factor | term '/' factor
+Expression -> Term | Expression + Term | Expression - Term
 
-factor -> number | identifier | '(' expression ')'
+Term -> Factor | Term * Factor | Term / Factor
 
-condition -> expression ('==' | '!=' | '<' | '>' | '<=' | '>=') expression
+Factor -> Number | Identifier | ( Expression )
 
-type -> 'int' | 'float' | 'char' | 'bool'
+Condition -> Expression == Expression
+            | Expression != Expression
+            | Expression < Expression
+            | Expression > Expression
+            | Expression <= Expression
+            | Expression >= Expression
 
-identifier -> IDENTIFIER
+Type -> int | float | char | bool
 
-number -> CONSTANT | STRING
+Identifier -> [_a-zA-Z][_a-zA-Z0-9]*
+
+Number -> [0-9]+

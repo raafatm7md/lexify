@@ -50,4 +50,5 @@ def lexer(program):
     print('--------------------------')
     print(tabulate(tokens_print, headers=['Lexeme', 'Token'], tablefmt='github'))
     print('--------------------------')
+    print(f'total number of tokens: {len(tokens_print)}\n')
     return tokens

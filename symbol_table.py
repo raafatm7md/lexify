@@ -62,7 +62,7 @@ class SymbolTable:
             current_line += 1
 
     def display_table(self):
-        print("Symbol Table:")
+        print("\nSymbol Table:")
         print(
             "{:<8} {:<15} {:<15} {:<10} {:<10} {:<20} {:<20}".format('Counter', 'Variable Name', 'Obj Address', 'Type',
                                                                      'Dimension', 'Line Declaration', 'Line Reference'))
