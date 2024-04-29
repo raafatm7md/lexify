@@ -1,0 +1,18 @@
+Program -> StatementList
+StatementList -> Statement StatementList | #
+Statement -> Declaration | Assignment | IfStatement | WhileStatement | PrintStatement
+Declaration -> Type Identifier ; | Type Assignment
+Assignment -> Identifier = Expression ;
+IfStatement -> if ( Condition ) { StatementList } ElseStatement
+ElseStatement -> else { StatementList } | #
+WhileStatement -> while ( Condition ) { StatementList }
+PrintStatement -> print ( Expression ) ;
+Expression -> Term Expression1
+Expression1 -> + Term Expression1 | - Term Expression1 | #
+Term -> Factor Term1
+Term1 -> * Factor Term1 | / Factor Term1 | #
+Factor -> Number | Identifier | ( Expression )
+Condition -> Expression == Expression | Expression != Expression | Expression < Expression | Expression > Expression | Expression <= Expression | Expression >= Expression
+Type -> int | float | char | bool
+Identifier -> id
+Number -> num

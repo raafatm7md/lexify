@@ -18,11 +18,15 @@ ElseStatement -> else { StatementList } | ε
 
 WhileStatement -> while ( Condition ) { StatementList }
 
-PrintStatement    -> print ( Expression ) ;
+PrintStatement -> print ( Expression ) ;
 
-Expression -> Term | Expression + Term | Expression - Term
+!!!     Expression -> Term | Expression + Term | Expression - Term      !!!
+Expression -> Term Expression'
+Expression' -> + Term Expression' | - Term Expression' | ε
 
-Term -> Factor | Term * Factor | Term / Factor
+!!!     Term -> Factor | Term * Factor | Term / Factor      !!!
+Term -> Factor Term'
+Term' -> * Factor Term' | / Factor Term' | ε
 
 Factor -> Number | Identifier | ( Expression )
 
