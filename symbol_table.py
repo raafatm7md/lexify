@@ -2,6 +2,43 @@ import re
 import sys
 
 
+class Node:
+    def __init__(self, key):
+        self.left = None
+        self.right = None
+        self.val = key
+
+
+def insert_tree(root, key):
+    if root is None:
+        return Node(key)
+    else:
+        if root.val < key:
+            root.right = insert_tree(root.right, key)
+        else:
+            root.left = insert_tree(root.left, key)
+    return root
+
+
+def print_symbol_tree(root):
+    if root is None:
+        return
+    queue = [root]
+    while queue:
+        level_length = len(queue)
+        for _ in range(level_length):
+            node = queue.pop(0)
+            print(node.val, end="")
+            if node.left:
+                queue.append(node.left)
+                print(" L", end="")
+            if node.right:
+                queue.append(node.right)
+                print(" R", end="")
+            print("  ", end="")
+        print()
+
+
 class Symbol:
     def __init__(self, counter, name, obj_address, variable_type, dimension, line_declaration):
         self.counter = counter
@@ -19,6 +56,7 @@ class Symbol:
 class SymbolTable:
     def __init__(self):
         self.symbols = {}
+        self.symbolls = []
         self.counter = 1
         self.error = {}
 
@@ -26,10 +64,12 @@ class SymbolTable:
         if name not in self.symbols:
             self.symbols[name] = Symbol(self.counter, name, obj_address, variable_type, dimension, line_declaration)
             self.counter += 1
+            self.symbolls.append(name)
 
     def add_reference(self, name, line_reference):
         if name in self.symbols:
-            if line_reference not in self.symbols[name].line_reference and line_reference != self.symbols[name].line_declaration:
+            if line_reference not in self.symbols[name].line_reference and line_reference != self.symbols[
+                name].line_declaration:
                 self.symbols[name].add_reference(line_reference)
         else:
             name = re.sub(r'\b(int|float|char|bool)\b', ' ', name)
@@ -73,8 +113,23 @@ class SymbolTable:
                                                                            ', '.join(map(str, symbol.line_reference))))
 
         for name, line in self.error.items():
-            print(f'Error: Undeclared variable __{name}__ in line {line}', file=sys.stderr)
+            print(f'\nError: Undeclared variable __{name}__ in line {line}', file=sys.stderr)
 
         for symbol in self.symbols.values():
             if len(symbol.line_reference) == 0:
-                print(f'Warning: Unused variable __{symbol.name}__ declared in line {symbol.line_declaration}')
+                print(f'Warning: Unused variable __{symbol.name}__ declared in line {symbol.line_declaration}', file=sys.stderr)
+
+        ordrd = self.symbolls.copy()
+        ordrd.sort()
+        print(f'\nUnordered: {(' '.join(self.symbolls))}')
+        print(f'Ordered: {(' '.join(ordrd))}\n')
+
+        for symbol in self.symbolls:
+            print(
+                f'hash({symbol}) = ({len(symbol)} + {ord(symbol[0])}) % {self.counter - 1} = {(len(symbol) + ord(symbol[0])) % (self.counter - 1)}')
+
+        root = Node(self.symbolls[0])
+        for i in range(1, len(self.symbolls)):
+            insert_tree(root, self.symbolls[i])
+        print()
+        print_symbol_tree(root)
