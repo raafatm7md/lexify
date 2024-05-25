@@ -12,11 +12,10 @@ class Node:
 def insert_tree(root, key):
     if root is None:
         return Node(key)
+    if root.val < key:
+        root.right = insert_tree(root.right, key)
     else:
-        if root.val < key:
-            root.right = insert_tree(root.right, key)
-        else:
-            root.left = insert_tree(root.left, key)
+        root.left = insert_tree(root.left, key)
     return root
 
 
@@ -56,80 +55,62 @@ class Symbol:
 class SymbolTable:
     def __init__(self):
         self.symbols = {}
-        self.symbolls = []
+        self.symbol_names = []
         self.counter = 1
-        self.error = {}
+        self.errors = {}
 
     def add_variable(self, name, obj_address, variable_type, dimension, line_declaration):
         if name not in self.symbols:
             self.symbols[name] = Symbol(self.counter, name, obj_address, variable_type, dimension, line_declaration)
             self.counter += 1
-            self.symbolls.append(name)
+            self.symbol_names.append(name)
 
     def add_reference(self, name, line_reference):
         if name in self.symbols:
-            if line_reference not in self.symbols[name].line_reference and line_reference != self.symbols[
-                name].line_declaration:
+            if line_reference not in self.symbols[name].line_reference and line_reference != self.symbols[name].line_declaration:
                 self.symbols[name].add_reference(line_reference)
         else:
-            name = re.sub(r'\b(int|float|char|bool)\b', ' ', name)
-            if not name.isspace():
-                self.error[name] = line_reference
+            cleaned_name = re.sub(r'\b(int|float|char|bool)\b', ' ', name).strip()
+            if cleaned_name:
+                self.errors[cleaned_name] = line_reference
 
     def parse_code(self, code):
         lines = code.split('\n')
-        current_line = 1
-
-        for line in lines:
-            match = re.match(
-                r'^\s*\b(int|float|char|bool)\b\s+([a-zA-Z_][a-zA-Z0-9_]*)(\s*\[\s*\d+\s*\])*(\s*\[\s*\d+\s*\])*',
-                line)
+        for current_line, line in enumerate(lines, 1):
+            match = re.match(r'^\s*(int|float|char|bool)\s+([a-zA-Z_]\w*)(\s*\[\d+\])*(\s*\[\d+\])*', line)
             if match:
-                declaration_sent = match.group()
                 variable_type = match.group(1)
                 variable_name = match.group(2)
                 obj_address = hex(id(variable_name))
-                dimension = 0
-                if '[' in declaration_sent:
-                    dimension = declaration_sent.count('[')
+                dimension = line.count('[')
                 self.add_variable(variable_name, obj_address, variable_type, dimension, current_line)
 
-            references = re.findall(r'\b([a-zA-Z_][a-zA-Z0-9_]*)\b(?!\s*=\s*;)',
-                                    re.sub(r'\'[^\']*\'|\"[^\"]*\"', '', line))
+            references = re.findall(r'\b([a-zA-Z_]\w*)\b(?!\s*=\s*;)', re.sub(r'\'[^\']*\'|\"[^\"]*\"', '', line))
             for reference in references:
                 self.add_reference(reference.strip(), current_line)
 
-            current_line += 1
-
     def display_table(self):
         print("\nSymbol Table:")
-        print(
-            "{:<8} {:<15} {:<15} {:<10} {:<10} {:<20} {:<20}".format('Counter', 'Variable Name', 'Obj Address', 'Type',
-                                                                     'Dimension', 'Line Declaration', 'Line Reference'))
+        print("{:<8} {:<15} {:<15} {:<10} {:<10} {:<20} {:<20}".format('Counter', 'Variable Name', 'Obj Address', 'Type', 'Dimension', 'Line Declaration', 'Line Reference'))
         for symbol in self.symbols.values():
-            print("{:<8} {:<15} {:<15} {:<10} {:<10} {:<20} {:<20}".format(symbol.counter, symbol.name,
-                                                                           symbol.obj_address, symbol.variable_type,
-                                                                           symbol.dimension, symbol.line_declaration,
-                                                                           ', '.join(map(str, symbol.line_reference))))
+            print("{:<8} {:<15} {:<15} {:<10} {:<10} {:<20} {:<20}".format(symbol.counter, symbol.name, symbol.obj_address, symbol.variable_type, symbol.dimension, symbol.line_declaration, ', '.join(map(str, symbol.line_reference))))
 
-        for name, line in self.error.items():
+        for name, line in self.errors.items():
             print(f'\nError: Undeclared variable __{name}__ in line {line}', file=sys.stderr)
 
         for symbol in self.symbols.values():
-            if len(symbol.line_reference) == 0:
+            if not symbol.line_reference:
                 print(f'Warning: Unused variable __{symbol.name}__ declared in line {symbol.line_declaration}', file=sys.stderr)
 
-        ordrd = self.symbolls.copy()
-        ordrd.sort()
-        print(f'\nUnordered: {(' '.join(self.symbolls))}')
-        print(f'Ordered: {(' '.join(ordrd))}\n')
+        ordered_symbols = sorted(self.symbol_names)
+        print(f'\nUnordered: {" ".join(self.symbol_names)}')
+        print(f'Ordered: {" ".join(ordered_symbols)}\n')
 
-        for symbol in self.symbolls:
-            print(
-                f'hash({symbol}) = ({len(symbol)} + {ord(symbol[0])}) % {self.counter - 1} = {(len(symbol) + ord(symbol[0])) % (self.counter - 1)}')
+        for symbol in self.symbol_names:
+            print(f'hash({symbol}) = ({len(symbol)} + {ord(symbol[0])}) % {self.counter - 1} = {(len(symbol) + ord(symbol[0])) % (self.counter - 1)}')
 
-        root = Node(self.symbolls[0])
-        for i in range(1, len(self.symbolls)):
-            insert_tree(root, self.symbolls[i])
+        root = Node(self.symbol_names[0])
+        for name in self.symbol_names[1:]:
+            insert_tree(root, name)
         print()
         print_symbol_tree(root)
